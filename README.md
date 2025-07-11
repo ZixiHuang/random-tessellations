@@ -22,8 +22,8 @@ The project currently supports:
 
 1.  **Create and activate a Conda environment** (recommended):
     ```bash
-    conda create --name tessellations python=3.10 -y
-    conda activate tessellations
+    conda create --name tess_env python=3.10 -y
+    conda activate tess_env
     ```
 
 2.  **Install the required dependencies** into the active environment:
