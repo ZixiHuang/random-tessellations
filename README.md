@@ -18,6 +18,9 @@ The project currently supports:
 
 ### 2. STIT Tessellation (`stit`)
 
+### 3. Mondrian Process (`mondrian`)
+Axis-aligned recursive partition process.
+
 ## Installation
 
 1.  **Create and activate a Conda environment** (recommended):
@@ -39,7 +42,7 @@ Run the main script from the command line with the following arguments:
 
 `python main.py {type} {dim} {param} [--dir_matrix PATH]`
 
--   `{type}`: The type of tessellation. Choices: `poisson`, `stit`.
+-   `{type}`: The type of tessellation. Choices: `poisson`, `stit`, `mondrian`.
 -   `{dim}`: The dimension. Choices: `2d`, `3d`.
 -   `{param}`:
     -   For `poisson`, this is `lam` (the intensity of the underlying Poisson point process), a float.
@@ -61,6 +64,11 @@ python main.py poisson 2d --lam 10
 **3D STIT Tessellation (stop_time = 20)**
 ```bash
 python main.py stit 3d --stop_time 20
+```
+
+**2D Mondrian Process (stop_time = 5)**
+```bash
+python main.py mondrian 2d --stop_time 5
 ```
 
 **2D Poisson with directional distribution from CSV**

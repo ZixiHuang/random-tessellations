@@ -2,13 +2,13 @@
 import argparse
 import os
 import numpy as np
-from tessellations import PoissonTessellation, STITTessellation
+from tessellations import PoissonTessellation, STITTessellation, MondrianTessellation
 
 def main():
     """Main function to run the tessellation sampler from the command line."""
     parser = argparse.ArgumentParser(description="Generate and visualize 2D/3D tessellations.")
     
-    parser.add_argument("type", type=str, choices=['poisson', 'stit'], 
+    parser.add_argument("type", type=str, choices=['poisson', 'stit', 'mondrian'], 
                         help="The type of tessellation to generate.")
     
     parser.add_argument("dim", type=str, choices=['2d', '3d'], 
@@ -71,8 +71,12 @@ def main():
         tess = PoissonTessellation(dim, direction_matrix=direction_matrix)
         param_name = 'lam'
         param_val = args.lam
-    else:
+    elif args.type == 'stit':
         tess = STITTessellation(dim, direction_matrix=direction_matrix)
+        param_name = 'stop_time'
+        param_val = args.stop_time
+    else:
+        tess = MondrianTessellation(dim)
         param_name = 'stop_time'
         param_val = args.stop_time
 
