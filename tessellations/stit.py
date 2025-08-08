@@ -49,8 +49,7 @@ class STITTessellation(Tessellation):
                 else: # 3D
                     p = np.random.uniform(cell_bounds[::2], cell_bounds[1::2], size=3)
 
-                n = np.random.standard_normal(size=self.dim)
-                n /= np.linalg.norm(n)
+                n = self._sample_direction()
                 self.hyperplanes.append((p, n))
 
                 split_cells = []

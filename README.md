@@ -37,13 +37,19 @@ The project currently supports:
 
 Run the main script from the command line with the following arguments:
 
-`python main.py {type} {dim} {param}`
+`python main.py {type} {dim} {param} [--dir_matrix PATH]`
 
 -   `{type}`: The type of tessellation. Choices: `poisson`, `stit`.
 -   `{dim}`: The dimension. Choices: `2d`, `3d`.
 -   `{param}`:
     -   For `poisson`, this is `lam` (the intensity of the underlying Poisson point process), a float.
     -   For `stit`, this is `stop_time` (the global stopping time for the cell division process), a float.
+
+-   `--dir_matrix PATH` (optional): Path to a CSV or NPY/NPZ file containing a directional distribution matrix.
+    -   Each row is a direction vector in R^d.
+    -   The row's Euclidean norm is used as its weight.
+    -   If weights do not sum to 1, they will be normalized automatically and a note will be printed.
+    -   Vectors are normalized to unit length before use.
 
 ### Examples
 
@@ -56,3 +62,16 @@ python main.py poisson 2d --lam 10
 ```bash
 python main.py stit 3d --stop_time 20
 ```
+
+**2D Poisson with directional distribution from CSV**
+```bash
+python main.py poisson 2d --lam 10 --dir_matrix directions.csv
+```
+
+Example CSV (3 rows, 2 columns for 2D):
+```
+1,0
+0,2
+1,1
+```
+This defines three directions with weights equal to their norms (1, 2, sqrt(2)), which will be normalized to sum to 1.

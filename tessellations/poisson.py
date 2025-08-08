@@ -28,8 +28,10 @@ class PoissonTessellation(Tessellation):
         else:
             points = np.random.uniform(self.bounds[::2], self.bounds[1::2], size=(n_hyperplanes, self.dim))
         
-        normals = np.random.standard_normal(size=(n_hyperplanes, self.dim))
-        normals /= np.linalg.norm(normals, axis=1)[:, np.newaxis]
+        if n_hyperplanes > 0:
+            normals = np.array([self._sample_direction() for _ in range(n_hyperplanes)], dtype=float)
+        else:
+            normals = np.zeros((0, self.dim), dtype=float)
         self.hyperplanes = list(zip(points, normals))
 
         for p, n in zip(points, normals):
