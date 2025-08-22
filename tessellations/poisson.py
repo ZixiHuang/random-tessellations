@@ -44,7 +44,9 @@ class PoissonTessellation(Tessellation):
     def _clip_and_add(self, cell, p, n, new_cells):
         try:
             if self.dim == 2:
-                line = LineString([p - n * 1000, p + n * 1000])
+                # Construct a line whose direction is perpendicular to the normal n
+                t = np.array([-n[1], n[0]], dtype=float)
+                line = LineString([p - t * 1000, p + t * 1000])
                 split_result = list(split(cell, line).geoms)
                 new_cells.extend(split_result)
             else:
