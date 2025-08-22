@@ -19,7 +19,7 @@ The project currently supports:
 ### 2. STIT Tessellation (`stit`)
 
 ### 3. Mondrian Process (`mondrian`)
-Axis-aligned recursive partition process.
+Axis-aligned recursive partition process. Ignores `--dir_matrix`.
 
 ## Installation
 
@@ -40,19 +40,24 @@ Axis-aligned recursive partition process.
 
 Run the main script from the command line with the following arguments:
 
-`python main.py {type} {dim} {param} [--dir_matrix PATH]`
+`python main.py {type} {dim} [--lam FLOAT | --stop_time FLOAT] [--dir_matrix PATH] [--animate]`
 
 -   `{type}`: The type of tessellation. Choices: `poisson`, `stit`, `mondrian`.
 -   `{dim}`: The dimension. Choices: `2d`, `3d`.
--   `{param}`:
-    -   For `poisson`, this is `lam` (the intensity of the underlying Poisson point process), a float.
-    -   For `stit`, this is `stop_time` (the global stopping time for the cell division process), a float.
+-   Parameter flags:
+    -   For `poisson`, use `--lam` (intensity of the underlying Poisson point process), a float.
+    -   For `stit`, use `--stop_time` (global stopping time for the cell division process), a float.
 
 -   `--dir_matrix PATH` (optional): Path to a CSV or NPY/NPZ file containing a directional distribution matrix.
     -   Each row is a direction vector in R^d.
     -   The row's Euclidean norm is used as its weight.
     -   If weights do not sum to 1, they will be normalized automatically and a note will be printed.
     -   Vectors are normalized to unit length before use.
+    -   Ignored for `mondrian`.
+
+-   `--animate` (optional): Animate by plotting generated hyperplanes one by one.
+    -   2D: draws each line sequentially using matplotlib.
+    -   3D: incrementally adds each sliced plane in a PyVista window.
 
 ### Examples
 
@@ -66,9 +71,14 @@ python main.py poisson 2d --lam 10
 python main.py stit 3d --stop_time 20
 ```
 
-**2D Mondrian Process (stop_time = 5)**
+**Animate 2D Poisson Tessellation**
 ```bash
-python main.py mondrian 2d --stop_time 5
+python main.py poisson 2d --lam 20 --animate
+```
+
+**Animate 3D STIT Tessellation**
+```bash
+python main.py stit 3d --stop_time 10 --animate
 ```
 
 **2D Poisson with directional distribution from CSV**
