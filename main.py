@@ -32,6 +32,12 @@ def main():
         ),
     )
 
+    parser.add_argument(
+        "--animate",
+        action="store_true",
+        help="Animate by plotting generated hyperplanes one by one.",
+    )
+
     args = parser.parse_args()
 
     dim = 2 if args.dim == '2d' else 3
@@ -84,7 +90,7 @@ def main():
     
     # Sample and visualize
     tess.sample(param_val)
-    tess.visualize()
+    tess.visualize(animate=args.animate)
 
 if __name__ == '__main__':
     main()

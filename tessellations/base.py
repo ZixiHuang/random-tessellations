@@ -2,6 +2,8 @@
 import numpy as np
 import pyvista as pv
 import matplotlib.pyplot as plt
+import time
+from matplotlib.patches import Rectangle
 
 class Tessellation:
     """A base class for 2D and 3D tessellations."""
@@ -26,51 +28,107 @@ class Tessellation:
         """The core method to be implemented by subclasses."""
         raise NotImplementedError("Subclasses must implement the sample method.")
 
-    def visualize(self):
-        """Visualizes the tessellation."""
+    def visualize(self, animate=False):
+        """Visualizes the tessellation.
+
+        If animate is True, plot generated hyperplanes one by one.
+        """
+        if not animate:
+            if self.dim == 2:
+                if not self.cells:
+                    print("No cells to visualize. Run the .sample() method first.")
+                    return
+                fig, ax = plt.subplots()
+                for cell in self.cells:
+                    x, y = cell.exterior.xy
+                    ax.fill(x, y, facecolor='w', edgecolor='k', linewidth=0.7)
+                ax.set_aspect('equal', 'box')
+                ax.axis('off')
+                plt.show()
+            else: # 3D
+                if not self.hyperplanes:
+                    print("No hyperplanes to visualize. Run the .sample() method first.")
+                    return
+                
+                plotter = pv.Plotter(window_size=[1024, 1024])
+                plotter.set_background('white')
+
+                box = pv.Box(bounds=self.bounds)
+                
+                slices = []
+                outlines = []
+                for p, n in self.hyperplanes:
+                    slice_outline = box.slice(normal=n, origin=p)
+                    if slice_outline.n_points > 0:
+                        filled_slice = slice_outline.delaunay_2d()
+                        slices.append(filled_slice)
+                        outlines.append(slice_outline)
+
+                for s in slices:
+                    plotter.add_mesh(s, color='darkgrey', show_edges=False)
+
+                for o in outlines:
+                    plotter.add_mesh(o, color='k', line_width=1)
+
+                plotter.add_mesh(box, style='wireframe', color='black', line_width=2)
+                
+                plotter.enable_lightkit()
+                
+                plotter.camera_position = 'iso'
+                plotter.enable_parallel_projection()
+                
+                plotter.show()
+            return
+
+        # Animated visualization
         if self.dim == 2:
-            if not self.cells:
-                print("No cells to visualize. Run the .sample() method first.")
+            if not self.hyperplanes:
+                print("No hyperplanes to animate. Run the .sample() method first.")
                 return
+            minx, miny, maxx, maxy = self.bounds
+            diag = float(np.hypot(maxx - minx, maxy - miny))
+            length = 2.0 * diag
+
             fig, ax = plt.subplots()
-            for cell in self.cells:
-                x, y = cell.exterior.xy
-                ax.fill(x, y, facecolor='w', edgecolor='k', linewidth=0.7)
+            ax.set_xlim(minx, maxx)
+            ax.set_ylim(miny, maxy)
             ax.set_aspect('equal', 'box')
             ax.axis('off')
+            ax.add_patch(Rectangle((minx, miny), maxx - minx, maxy - miny, fill=False, edgecolor='black', linewidth=2))
+
+            plt.show(block=False)
+            for p, n in self.hyperplanes:
+                n = np.asarray(n, dtype=float)
+                t = np.array([-n[1], n[0]], dtype=float)
+                tn = t / (np.linalg.norm(t) + 1e-12)
+                p = np.asarray(p, dtype=float)
+                a = p - tn * length
+                b = p + tn * length
+                ax.plot([a[0], b[0]], [a[1], b[1]], color='k', linewidth=1)
+                plt.pause(0.5)
             plt.show()
-        else: # 3D
+        else:
             if not self.hyperplanes:
-                print("No hyperplanes to visualize. Run the .sample() method first.")
+                print("No hyperplanes to animate. Run the .sample() method first.")
                 return
-            
             plotter = pv.Plotter(window_size=[1024, 1024])
             plotter.set_background('white')
-
             box = pv.Box(bounds=self.bounds)
-            
-            slices = []
-            outlines = []
-            for p, n in self.hyperplanes:
-                slice_outline = box.slice(normal=n, origin=p)
-                if slice_outline.n_points > 0:
-                    filled_slice = slice_outline.delaunay_2d()
-                    slices.append(filled_slice)
-                    outlines.append(slice_outline)
-
-            for s in slices:
-                plotter.add_mesh(s, color='darkgrey', show_edges=False)
-
-            for o in outlines:
-                plotter.add_mesh(o, color='k', line_width=1)
-
             plotter.add_mesh(box, style='wireframe', color='black', line_width=2)
-            
             plotter.enable_lightkit()
-            
             plotter.camera_position = 'iso'
             plotter.enable_parallel_projection()
-            
+            plotter.show(auto_close=False, interactive_update=True)
+            time.sleep(0.5)
+            added_meshes = []
+            for p, n in self.hyperplanes:
+                slice_outline = box.slice(normal=np.asarray(n, dtype=float), origin=np.asarray(p, dtype=float))
+                if slice_outline.n_points > 0:
+                    filled_slice = slice_outline.delaunay_2d()
+                    added_meshes.append(plotter.add_mesh(filled_slice, color='darkgrey', show_edges=False))
+                    added_meshes.append(plotter.add_mesh(slice_outline, color='k', line_width=1))
+                    plotter.update()
+                    time.sleep(0.5)
             plotter.show()
 
     # --- Directional distribution helpers ---
